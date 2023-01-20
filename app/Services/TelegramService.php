@@ -4,6 +4,9 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 
+/**
+ * @todo make facade instead of static class
+ */
 class TelegramService
 {
     private static $token;
