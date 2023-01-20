@@ -28,15 +28,14 @@ class TelegramUpdateHandlerCommand extends Command
      */
     public function handle()
     {
-        $telegramService = app(TelegramService::class);
         $updateId = 0;
-        $updates = $telegramService->getUpdated($updateId);
+        $updates = TelegramService::getUpdated($updateId);
         foreach ($updates as $update) {
             $text = sprintf('Thank you for your "%s" message', $update['message']['text']);
             $telegramService->sendMessage($update['message']['chat']['id'], $text);
             $updateId = $update['update_id'];
         }
-        $updates = $telegramService->getUpdated($updateId + 1);
+        TelegramService::getUpdated($updateId + 1);
         return Command::SUCCESS;
     }
 }
