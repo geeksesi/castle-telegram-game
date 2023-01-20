@@ -4,32 +4,40 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 
+/**
+ * @todo make facade instead of static class
+ */
 class TelegramService
 {
-    protected $token;
-    public function __construct()
+    private static $token;
+
+    protected static function getToken(): string
     {
-        $this->token = env('TELEGRAM_BOT_TOKEN');
+        if (static::$token) {
+            return static::$token;
+        }
+        static::$token = env('TELEGRAM_BOT_TOKEN');
+        return static::$token;
     }
 
-    protected function execute($method, $params = [])
+    protected static function execute($method, $params = [])
     {
-        $url = sprintf('https://api.telegram.org/bot%s/%s', $this->token, $method);
+        $url = sprintf('https://api.telegram.org/bot%s/%s', static::getToken(), $method);
         $request = Http::post($url, $params);
         return $request->json('result', []);
     }
 
-    public function getUpdated(int $offset)
+    public static function getUpdated(int $offset)
     {
-        $response = $this->execute('getUpdates', [
+        $response = static::execute('getUpdates', [
             'offset' => $offset
         ]);
         return $response;
     }
 
-    public function sendMessage(string $chatId, string $text)
+    public static function sendMessage(string $chatId, string $text)
     {
-        $response = $this->execute('sendMessage', [
+        $response = static::execute('sendMessage', [
             'chat_id' => $chatId,
             'text' => $text
         ]);
