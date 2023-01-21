@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Facades\Telegram;
 use App\Services\TelegramRouteHandlerService;
 use Illuminate\Console\Command;
 
@@ -29,12 +30,12 @@ class TelegramUpdateHandlerCommand extends Command
     public function handle()
     {
         $updateId = 0;
-        $updates = \Telegram::getUpdated($updateId);
+        $updates = Telegram::getUpdated($updateId);
         foreach ($updates as $update) {
             (new TelegramRouteHandlerService($update))->execute();
             $updateId = $update['update_id'];
         }
-        \Telegram::getUpdated($updateId + 1);
+        Telegram::getUpdated($updateId + 1);
         return Command::SUCCESS;
     }
 }

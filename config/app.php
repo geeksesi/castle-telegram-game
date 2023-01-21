@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\TelegramService;
+use App\Facades\Telegram;
 use Illuminate\Support\Facades\Facade;
 
 return [
@@ -210,7 +210,7 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        'Telegram' => TelegramService::class,
+        'Telegram' => Telegram::class,
     ])->toArray(),
 
 ];
