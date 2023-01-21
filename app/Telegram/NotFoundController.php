@@ -2,6 +2,7 @@
 
 namespace App\Telegram;
 
+use App\Facades\Telegram;
 use App\Services\TelegramService;
 
 class NotFoundController extends TelegramController
@@ -17,6 +18,6 @@ class NotFoundController extends TelegramController
         $chatId = $this->update['message']['chat']['id'];
         $text = 'Command not found';
 
-        return \Telegram::sendMessage($chatId, $text);
+        return Telegram::sendMessage($chatId, $text);
     }
 }
