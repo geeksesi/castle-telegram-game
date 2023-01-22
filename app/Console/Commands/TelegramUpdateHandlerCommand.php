@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Facades\Telegram;
 use App\Services\TelegramRouteHandlerService;
+use App\Telegram\Requests\Request;
 use Illuminate\Console\Command;
 
 class TelegramUpdateHandlerCommand extends Command
@@ -20,7 +21,7 @@ class TelegramUpdateHandlerCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'answer telegram messages without webhook';
 
     /**
      * Execute the console command.
@@ -32,7 +33,8 @@ class TelegramUpdateHandlerCommand extends Command
         $updateId = 0;
         $updates = Telegram::getUpdated($updateId);
         foreach ($updates as $update) {
-            (new TelegramRouteHandlerService($update))->execute();
+            $request = app(Request::class, ['update' => $update]);
+            app(TelegramRouteHandlerService::class, ['update' => $request])->execute();
             $updateId = $update['update_id'];
         }
         Telegram::getUpdated($updateId + 1);
