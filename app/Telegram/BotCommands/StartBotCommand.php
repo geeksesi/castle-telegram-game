@@ -10,6 +10,6 @@ class StartBotCommand extends TelegramController
 {
     public function __invoke(Request $request)
     {
-        Telegram::sendMessage($request->getChatId(), "Start");
+        Telegram::sendMessage($request->getChatId(), "game home menu");
     }
 }
