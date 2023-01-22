@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
-use App\Telegram\NotFoundController;
+use App\Telegram\Exceptions\NotFoundController;
+use App\Telegram\Exceptions\UnsupportedMessage;
+use App\Telegram\Requests\Request;
 use App\Telegram\SuperCommands\SendToAllSuperCommand;
 use ReflectionFunction;
 
 class TelegramRouteHandlerService
 {
     private $routes;
-    private $update;
-    public function __construct(array $update)
+    private Request $update;
+    public function __construct(Request $update)
     {
         $this->routes = require_once base_path('routes/telegram.php');
         $this->update = $update;
@@ -18,7 +20,11 @@ class TelegramRouteHandlerService
 
     public function execute()
     {
-        $text = $this->update['message']['text'];
+        if (!$this->update->isText()) {
+            return app()->call(UnsupportedMessage::class, ['request' => $this->update]);
+        }
+
+        $text = $this->update->getText();
         if ($this->isSuperCommand($text)) {
             return $this->executeSuperCommand($text);
         }
@@ -44,18 +50,32 @@ class TelegramRouteHandlerService
             $command = $unCompress[0];
             $callable = $this->routes['super_commands'][$command];
             $parameters = explode('\\*', $unCompress[1] ?? '');
-            $argumentsCount = (new \ReflectionMethod($callable, '__invoke'))->getNumberOfParameters();
+            $parameters = [$this->update, ...$parameters];
 
-            throw_if(count($parameters) != $argumentsCount, new \Exception('Invalid arguments count'));
+            $callableReflation = new \ReflectionMethod($callable, '__invoke');
+            $argumentsCount = $callableReflation->getNumberOfRequiredParameters();
+            throw_if(count($parameters) < $argumentsCount, new \Exception('Invalid arguments count'));
         } catch (\Throwable $th) {
-            return (new NotFoundController($this->update))();
+            return app()->call(NotFoundController::class, ['request' => $this->update]);
         }
-        return (new $callable($this->update))(...$parameters);
+        $parameters = $this->syncParameterToFunctionParameter($callableReflation->getParameters(), $parameters);
+
+        return app()->call($callable, $parameters);
+    }
+
+    private function syncParameterToFunctionParameter(array $functionParameters, array $parameters): array
+    {
+        $output = [];
+        foreach ($parameters as $key => $value) {
+            $name = $functionParameters[$key]->getName();
+            $output[$name] = $value;
+        }
+        return $output;
     }
 
     private function executeBotCommand(string $text)
     {
         $superCommand = $this->routes['bot_commands'][$text];
-        (new $superCommand($this->update))();
+        return app()->call($superCommand, ['request' => $this->update]);
     }
 }
