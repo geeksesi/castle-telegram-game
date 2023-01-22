@@ -13,6 +13,7 @@ class Request
     public function __construct(array $update)
     {
         $this->update = $update;
+        $this->getUser();
     }
 
     public function getText(): string
@@ -40,7 +41,6 @@ class Request
         return User::where('telegram_id', $this->update['message']['from']['id'])->firstOrCreate([
             'telegram_id' => $this->update['message']['from']['id'],
             'name' => $this->update['message']['from']['first_name'],
-            'username' => $this->update['message']['from']['username'],
         ]);
     }
 

@@ -3,12 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\City>
  */
-class UserFactory extends Factory
+class CityFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -18,8 +17,7 @@ class UserFactory extends Factory
     public function definition()
     {
         return [
-            'name' => fake()->name(),
-            'telegram_id' => fake()->numberBetween(100000, 999999),
+            //
         ];
     }
 }
